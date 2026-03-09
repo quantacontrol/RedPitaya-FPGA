@@ -60,7 +60,14 @@ To better understand the visualization interface, here is a breakdown of the sig
 ## Performance Demo & Setup
 
 ### Video Demo
-Watch the system in action: [Red Pitaya Lock-in + PID Control Demo](https://www.youtube.com/watch?v=sSpzQ4u3Dys)
+
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=sSpzQ4u3Dys" target="_blank">
+    <img src="https://img.youtube.com/vi/sSpzQ4u3Dys/0.jpg" alt="Red Pitaya Lock-in + PID Control Demo" width="600" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+    <br>
+    <b>▶ Click to watch the Lock-in + PID System Demo</b>
+  </a>
+</div>
 
 ### Hardware Setup & Procedure
 To reproduce the demo, follow these steps:
