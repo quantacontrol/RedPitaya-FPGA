@@ -71,7 +71,18 @@ add_files -fileset constrs_1      $path_sdc/red_pitaya.xdc
 }
 
 add_files                         $path_rtl
-add_files                         $path_bd
+# add_files                         $path_bd
+
+# Add Feedback Controller files
+add_files ../../modeling/rtl/feedback_controller_top.sv
+add_files ../../modeling/rtl/signal_model.sv
+add_files ../../modeling/rtl/pid_controller.sv
+add_files ../../modeling/rtl/prng.sv
+add_files ../../modeling/rtl/sine_gen.sv
+add_files ../../modeling/rtl/sine_lut.sv
+add_files ../../modeling/rtl/cic_filter.sv
+add_files ../../modeling/rtl/scaler.sv
+add_files -norecurse ../../modeling/rtl/sine_lut.mem
 
 set ip_files [glob -nocomplain $path_ip/*.xci]
 if {$ip_files != ""} {

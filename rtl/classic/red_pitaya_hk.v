@@ -114,7 +114,7 @@ DNA_PORT #(.SIM_DNA_VALUE (DNA)) i_DNA (
 wire [32-1: 0] id_value;
 
 assign id_value[31: 4] = 28'h0; // reserved
-assign id_value[ 3: 0] =  4'h1; // board type   1 - release 1
+assign id_value[ 3: 0] =  4'h2; // board type   1 - release 1
 
 
 //---------------------------------------------------------------------------------

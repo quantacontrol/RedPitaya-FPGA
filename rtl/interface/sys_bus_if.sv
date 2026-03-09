@@ -3,6 +3,7 @@
 // Authors: Matej Oblak, Iztok Jeras
 // (c) Red Pitaya  http://www.redpitaya.com
 ////////////////////////////////////////////////////////////////////////////////
+`timescale 1ns / 1ps
 
 interface sys_bus_if #(
   int unsigned DW = 32  ,  // data width (8,16,...,1024)

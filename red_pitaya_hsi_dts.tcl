@@ -11,8 +11,7 @@ cd prj/$prj_name
 
 set path_sdk sdk
 
-hsi open_hw_design $path_sdk/red_pitaya.sysdef
-#hsi::open_hw_design $path_sdk/red_pitaya.sysdef
+hsi open_hw_design $path_sdk/red_pitaya.xsa
 
 set ver 2017.2
 
@@ -28,7 +27,7 @@ foreach item $argv {
 puts "DTS version: $ver"
 
 
-hsi set_repo_path ../../../tmp/device-tree-xlnx-xilinx-v$ver/
+hsi set_repo_path ../../tmp/device-tree-xlnx-xilinx-v$ver/
 
 hsi create_sw_design device-tree -os device_tree -proc ps7_cortexa9_0
 

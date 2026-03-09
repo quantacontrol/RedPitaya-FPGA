@@ -3,6 +3,8 @@
 // Author: Iztok Jeras <iztok.jeras@redpitaya.com>
 // (c) Red Pitaya  (redpitaya.com)
 ////////////////////////////////////////////////////////////////////////////////
+`timescale 1ns / 1ps
+
 //`define BUS_NAME_M bus_m
 //`define BUS_NAME_S bus_inter
 

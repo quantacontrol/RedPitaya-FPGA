@@ -211,7 +211,7 @@ logic                    dac_axi_rstn;
 
 logic        [14-1:0] dac_dat_a, dac_dat_b;
 logic        [14-1:0] dac_a    , dac_b    ;
-logic signed [15-1:0] dac_a_sum, dac_b_sum;
+logic signed [16-1:0] dac_a_sum, dac_b_sum;
 
 // ASG
 SBG_T [2-1:0]            asg_dat;
@@ -219,12 +219,15 @@ SBG_T [2-1:0]            asg_dat;
 // PID
 SBA_T [2-1:0]            pid_dat;
 
+// Feedback Controller DAC output
+wire signed [13:0]       fbc_dac_out;
+
 // configuration
 logic [2-1:0]            digital_loop;
 
 // system bus
 sys_bus_if   ps_sys      (.clk (fclk[0]), .rstn (frstn[0]));
-sys_bus_if   sys [8-1:0] (.clk (adc_clk), .rstn (adc_rstn));
+sys_bus_if   sys [16-1:0] (.clk (adc_clk), .rstn (adc_rstn));
 
 // GPIO interface
 gpio_if #(.DW (3*GDW)) gpio ();
@@ -359,7 +362,7 @@ red_pitaya_ps ps (
 ////////////////////////////////////////////////////////////////////////////////
 
 sys_bus_interconnect #(
-  .SN (8),
+  .SN (16),
   .SW (20)
 ) sys_bus_interconnect (
   .pll_locked_i(pll_locked),
@@ -440,13 +443,18 @@ end
 // DAC IO
 ////////////////////////////////////////////////////////////////////////////////
 
-// Sumation of ASG and PID signal perform saturation before sending to DAC 
-assign dac_a_sum = asg_dat[0] + pid_dat[0];
-assign dac_b_sum = asg_dat[1] + pid_dat[1];
+// Sumation of ASG, PID, and Feedback Controller signals with saturation before DAC
+// OUT1 includes feedback controller's DAC output (disturbance + closed-loop feedback)
+assign dac_a_sum = $signed({{2{asg_dat[0][13]}}, asg_dat[0]}) + $signed({{2{pid_dat[0][13]}}, pid_dat[0]}) + $signed({{2{fbc_dac_out[13]}}, fbc_dac_out});
+assign dac_b_sum = $signed({{2{asg_dat[1][13]}}, asg_dat[1]}) + $signed({{2{pid_dat[1][13]}}, pid_dat[1]});
 
-// saturation
-assign dac_a = (^dac_a_sum[15-1:15-2]) ? {dac_a_sum[15-1], {13{~dac_a_sum[15-1]}}} : dac_a_sum[14-1:0];
-assign dac_b = (^dac_b_sum[15-1:15-2]) ? {dac_b_sum[15-1], {13{~dac_b_sum[15-1]}}} : dac_b_sum[14-1:0];
+// saturation (16-bit signed to 14-bit signed)
+assign dac_a = (dac_a_sum > $signed(16'sd8191))  ? 14'sd8191  :
+               (dac_a_sum < $signed(-16'sd8192)) ? -14'sd8192 :
+               dac_a_sum[13:0];
+assign dac_b = (dac_b_sum > $signed(16'sd8191))  ? 14'sd8191  :
+               (dac_b_sum < $signed(-16'sd8192)) ? -14'sd8192 :
+               dac_b_sum[13:0];
 
 // output registers + signed to unsigned (also to negative slope)
 always @(posedge dac_clk_1x)
@@ -549,6 +557,10 @@ assign CAN1_rx = can_on & exp_p_in[6];
 // oscilloscope
 ////////////////////////////////////////////////////////////////////////////////
 
+// [Step C] Feedback Controller Signals
+wire signed [13:0] fbc_scope_ch1;
+wire signed [13:0] fbc_scope_ch2;
+
 wire [ 4-1:0] trig_ch_0_1;
 wire [ 4-1:0] trig_ch_2_3 = 4'h0;
 wire [16-1:0] trg_state_ch_0_1;
@@ -565,7 +577,8 @@ rp_scope_com #(
   .RSZ(14)) 
   i_scope (
   // ADC
-  .adc_dat_i     ({adc_dat[1], adc_dat[0]}  ),
+  // .adc_dat_i     ({adc_dat[1], adc_dat[0]}  ),
+  .adc_dat_i     ({fbc_scope_ch2, fbc_scope_ch1}  ), // Modified for Feedback Controller
   .adc_clk_i     ({2{adc_clk}}  ),  // clock
   .adc_rstn_i    ({2{adc_rstn}} ),  // reset - active low
   .trig_ext_i    (trig_ext    ),  // external trigger
@@ -772,7 +785,41 @@ red_pitaya_daisy  #(
   `else
   sys_bus_stub sys_bus_stub_6 (sys[6]);
   `endif
-  sys_bus_stub sys_bus_stub_7 (sys[7]);
+  // sys_bus_stub sys_bus_stub_7 (sys[7]);
+  red_pitaya_dummy i_dummy_7 (.bus (sys[7]));
+
+  // Stubs for unused slots
+  sys_bus_stub sys_bus_stub_8 (sys[8]);
+
+  // Your new module at 0x40900000
+  // red_pitaya_dummy i_dummy (
+  //     .bus (sys[9])
+  // );
+
+  feedback_controller_top i_feedback (
+      .clk_i      (adc_clk),
+      .rst_n_i    (adc_rstn),
+      .sys_addr_i (sys[9].addr ),
+      .sys_wdata_i(sys[9].wdata),
+      .sys_wen_i  (sys[9].wen  ),
+      .sys_ren_i  (sys[9].ren  ),
+      .sys_rdata_o(sys[9].rdata),
+      .sys_err_o  (sys[9].err  ),
+      .sys_ack_o  (sys[9].ack  ),
+      .adc_dat_a_i(adc_dat[0]),
+      .adc_dat_b_i(adc_dat[1]),
+      .dac_out_o  (fbc_dac_out),
+      .scope_ch1_o(fbc_scope_ch1),
+      .scope_ch2_o(fbc_scope_ch2)
+  );
+
+  // More stubs
+  sys_bus_stub sys_bus_stub_10 (sys[10]);
+  sys_bus_stub sys_bus_stub_11 (sys[11]);
+  sys_bus_stub sys_bus_stub_12 (sys[12]);
+  sys_bus_stub sys_bus_stub_13 (sys[13]);
+  sys_bus_stub sys_bus_stub_14 (sys[14]);
+  sys_bus_stub sys_bus_stub_15 (sys[15]);
 
 `else
 IOBUF i_iobuf (.O(trig_ext), .IO(exp_p_io[0]), .I(1'b0), .T(1'b1) );

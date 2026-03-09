@@ -85,12 +85,30 @@ write_hwdef -force       -file    $path_sdk/red_pitaya.hwdef
 add_files -quiet                  [glob -nocomplain ../../$path_rtl/*_pkg.sv]
 add_files -quiet                  [glob -nocomplain       $path_rtl/*_pkg.sv]
 
+
+
 if {$prj_name != "pyrpl"} {
 add_files                         ../../$path_rtl
 add_files -fileset constrs_1      $path_sdc/red_pitaya.xdc
 }
 
 add_files                               $path_rtl
+
+# Add Simulation/Feedback Controller files
+add_files ../../modeling/rtl/feedback_controller_top.sv
+add_files ../../modeling/rtl/signal_model.sv
+add_files ../../modeling/rtl/pid_controller.sv
+add_files ../../modeling/rtl/prng.sv
+add_files ../../modeling/rtl/sine_gen.sv
+add_files ../../modeling/rtl/sine_lut.sv
+add_files ../../modeling/rtl/cic_filter.sv
+add_files ../../modeling/rtl/scaler.sv
+add_files -norecurse ../../modeling/rtl/sine_lut.mem
+
+
+if {[file exists .gen/sources_1/bd/system/hdl]} {
+    set path_bd .gen/sources_1/bd/system/hdl
+}
 add_files                               $path_bd
 
 set ip_files [glob -nocomplain $path_ip/*.xci]
@@ -176,8 +194,6 @@ write_bitstream -force -bin_file  $path_out/red_pitaya
 # generate system definition
 ################################################################################
 
-write_sysdef -force      -hwdef   $path_sdk/red_pitaya.hwdef \
-                         -bitfile $path_out/red_pitaya.bit \
-                         -file    $path_sdk/red_pitaya.sysdef
+write_hw_platform -fixed -include_bit -force -file $path_sdk/red_pitaya.xsa
 
 exit

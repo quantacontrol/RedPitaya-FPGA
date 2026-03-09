@@ -1,0 +1,10 @@
+target/
+**/*.zip
+
+deploy/
+dist/
+node_modules/
+
+tmp/
+.venv/
+debug/
