@@ -1,5 +1,7 @@
 # Red Pitaya Lock-in + PID Control System (Incubating)
 
+[![Website](https://img.shields.io/badge/Website-quantacontrol.com-blue)](https://quantacontrol.com/)
+
 > **Note**: This README specifically describes the specialized Lock-in + PID control system located in the `modeling/` and `rp_web/` directories. It is **not** the documentation for the upstream `RedPitaya-FPGA` project.
 
 This project is an independent effort to build a high-performance, general-purpose control module for quantum optics experiments. While it currently resides within this repository for development, the long-term goal is to evolve this into a standalone project that is decoupled from the standard Red Pitaya FPGA ecosystem, allowing for easier adaptation to custom high-speed hardware.
