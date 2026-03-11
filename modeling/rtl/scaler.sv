@@ -25,8 +25,11 @@ module scaler (
         end else begin
             dout_valid <= din_valid;
             if (din_valid) begin
-                automatic logic signed [83:0] m = din * COEFF;
-                automatic logic signed [31:0] s = m >>> SHIFT;
+                logic signed [83:0] m;
+                logic signed [31:0] s;
+                
+                m = din * COEFF;
+                s = m >>> SHIFT;
                 mult_res <= m;
                 
                 // Saturation logic
