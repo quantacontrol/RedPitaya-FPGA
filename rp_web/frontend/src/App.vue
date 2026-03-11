@@ -15,7 +15,12 @@ function handleScopeSample(sample: { ch1Mean: number; ch2Mean: number }) {
 <template>
   <div class="app-container">
     <header class="app-header">
-      <h1>Red Pitaya Web Scope & Control</h1>
+      <div class="header-content">
+        <h1>Red Pitaya Web Scope & Control</h1>
+        <div class="header-links">
+          <a href="https://quantacontrol.com/" target="_blank" class="website-link">quantacontrol.com</a>
+        </div>
+      </div>
     </header>
     
     <div class="app-layout">
@@ -47,10 +52,34 @@ function handleScopeSample(sample: { ch1Mean: number; ch2Mean: number }) {
   border-bottom: 2px solid #444;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .app-header h1 {
   margin: 0;
   font-size: 24px;
   color: #fff;
+}
+
+.header-links {
+  display: flex;
+  gap: 15px;
+}
+
+.website-link {
+  color: #4a90e2;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.website-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .app-layout {
