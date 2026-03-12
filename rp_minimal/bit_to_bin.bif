@@ -1,0 +1,4 @@
+all:
+{
+    out/rp_minimal.bit
+}

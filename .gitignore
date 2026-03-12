@@ -31,3 +31,7 @@ sim/obj_dir/
 # SD card image build
 out/
 .cache/
+
+venv/
+.Xil/
+vivado_project/

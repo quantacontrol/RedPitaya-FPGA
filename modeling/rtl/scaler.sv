@@ -15,30 +15,40 @@ module scaler (
     localparam signed [19:0] COEFF = 20'd302231;
     localparam int SHIFT = 60;
     
+    // Pipeline Stage 1: Multiplication
     logic signed [83:0] mult_res; // 64 + 20
+    logic               stage1_valid;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            dout_valid <= 0;
-            dout <= 0;
             mult_res <= 0;
+            stage1_valid <= 0;
+            dout <= 0;
+            dout_valid <= 0;
         end else begin
-            dout_valid <= din_valid;
+            // Stage 1: Multiplier
             if (din_valid) begin
-                logic signed [83:0] m;
-                logic signed [31:0] s;
+                mult_res <= din * COEFF;
+                stage1_valid <= 1'b1;
+            end else begin
+                stage1_valid <= 1'b0;
+            end
+
+            // Stage 2: Shift and Saturate
+            if (stage1_valid) begin
+                automatic logic signed [31:0] s;
+                s = 32'(mult_res >>> SHIFT);
                 
-                m = din * COEFF;
-                s = m >>> SHIFT;
-                mult_res <= m;
-                
-                // Saturation logic
                 if (s > 32'sd8191) 
                     dout <= 14'sd8191;
                 else if (s < -32'sd8192) 
                     dout <= -14'sd8192;
                 else 
                     dout <= s[13:0];
+                
+                dout_valid <= 1'b1;
+            end else begin
+                dout_valid <= 1'b0;
             end
         end
     end
