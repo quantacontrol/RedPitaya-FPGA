@@ -1,8 +1,14 @@
-# Red Pitaya Lock-in + PID Control System (Incubating)
+# Red Pitaya Lock-in + PID Control System
 
-[![Website](https://img.shields.io/badge/Website-quantacontrol.com-blue)](https://quantacontrol.com/)
+[![Website](https://img.shields.io/badge/Website-quantacontrol.com-blue?style=flat-square)](https://quantacontrol.com/)
+[![Technology](https://img.shields.io/badge/Docs-Signal%20Chain%20Architecture-informational?style=flat-square)](https://quantacontrol.com/technology)
+[![Blog](https://img.shields.io/badge/Blog-Technical%20Articles-lightgrey?style=flat-square)](https://quantacontrol.com/blog)
 
-> **Website**: Learn more about our commercial solutions and optical quantum research services at [quantacontrol.com](https://quantacontrol.com/).
+**FPGA-based precision feedback control for quantum optics.** Real-time lock-in amplification and PID control on the Xilinx Zynq (Red Pitaya), with sub-microsecond loop latency and no proprietary software.
+
+**Full documentation, interactive architecture diagrams, and technical deep-dives at [quantacontrol.com](https://quantacontrol.com/).**
+
+---
 
 > **Note**: This README specifically describes the specialized Lock-in + PID control system located in the `modeling/` and `rp_web/` directories. It is **not** the documentation for the upstream `RedPitaya-FPGA` project.
 
@@ -106,3 +112,12 @@ In our testing on the Red Pitaya 125-14:
 
 ## Acknowledgments
 This implementation is based on several real-world quantum optics projects, aiming to provide a "prototype-to-production" path for control systems in the lab.
+
+---
+
+## Learn More
+
+- **Website**: [quantacontrol.com](https://quantacontrol.com/)
+- **Technology deep-dive**: [quantacontrol.com/technology](https://quantacontrol.com/technology) — full signal chain architecture, register map, and CIC/PID implementation details
+- **Blog**: [quantacontrol.com/blog](https://quantacontrol.com/blog) — technical articles on FPGA feedback control, lock-in amplification, and Allan deviation analysis
+- **Contact**: [quantacontrol.com/contact](https://quantacontrol.com/contact) — for cavity locking, comb stabilization, or custom control loop inquiries
