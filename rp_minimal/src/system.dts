@@ -1,0 +1,36 @@
+/dts-v1/;
+/plugin/;
+
+/*
+ * Device tree overlay for rp_minimal FPGA image.
+ *
+ * AXI address map (from build_bd.tcl, GP0 @ 0x40000000, range 0x40000000):
+ *   0x40000000  feedback_controller_top  (lock-in + PID registers)
+ *   0x40100000  oscilloscope capture buffer (future)
+ *
+ * The Rust backend accesses registers via /dev/mem mmap — no UIO driver needed.
+ * This overlay just registers the two regions so the kernel tracks them and
+ * /dev/mem access is sanctioned by the device-tree reserved map.
+ */
+
+/ {
+    compatible = "xlnx,zynq-7000";
+
+    fragment@0 {
+        target-path = "/amba";
+        __overlay__ {
+            #address-cells = <1>;
+            #size-cells = <1>;
+
+            feedback_controller: feedback_controller@40000000 {
+                compatible = "generic-uio";
+                reg = <0x40000000 0x10000>;
+            };
+
+            osc_capture: osc_capture@40100000 {
+                compatible = "generic-uio";
+                reg = <0x40100000 0x10000>;
+            };
+        };
+    };
+};

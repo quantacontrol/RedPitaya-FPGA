@@ -90,6 +90,16 @@ module signal_model (
             return val[13:0];
     endfunction
 
-    assign disturbance_out = saturate14(disturbance_sum_q >>> 16);
+    reg signed [13:0] disturbance_out_q;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            disturbance_out_q <= 14'sd0;
+        end else begin
+            disturbance_out_q <= saturate14(disturbance_sum_q >>> 16);
+        end
+    end
+
+    assign disturbance_out = disturbance_out_q;
 
 endmodule
