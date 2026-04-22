@@ -11,7 +11,7 @@ const OSC_BASE: usize = 0x40100000;
 const OSC_SIZE: usize = 0x30000; // Covers registers + both channel buffers
 
 // Feedback Controller Memory Map
-const FB_CTRL_BASE: usize = 0x40900000;
+const FB_CTRL_BASE: usize = 0x40000000;
 const FB_CTRL_SIZE: usize = 0x1000; // 4KB should be enough
 
 // Oscilloscope Register Offsets

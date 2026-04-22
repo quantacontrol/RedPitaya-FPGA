@@ -69,6 +69,25 @@ module feedback_controller_top (
     reg [ 2:0] reg_output_mux_ch2; // 0x24
 
     // =========================================================================
+    // Input Registers for Timing
+    // =========================================================================
+    reg [31:0]      sys_addr_q;
+    reg [31:0]      sys_wdata_q;
+    reg             sys_wen_q;
+    reg             sys_ren_q;
+    reg signed [13:0] adc_dat_a_q;
+    reg signed [13:0] adc_dat_b_q;
+
+    always_ff @(posedge clk_i) begin
+        sys_addr_q  <= sys_addr_i;
+        sys_wdata_q <= sys_wdata_i;
+        sys_wen_q   <= sys_wen_i;
+        sys_ren_q   <= sys_ren_i;
+        adc_dat_a_q <= adc_dat_a_i;
+        adc_dat_b_q <= adc_dat_b_i;
+    end
+
+    // =========================================================================
     // Bus Logic (matching Red Pitaya bus protocol)
     // =========================================================================
     always_ff @(posedge clk_i) begin
@@ -87,29 +106,29 @@ module feedback_controller_top (
             reg_output_mux_ch1 <= 3'd0;
             reg_output_mux_ch2 <= 3'd1;
         end else begin
-            sys_ack_o <= sys_wen_i | sys_ren_i;
+            sys_ack_o <= sys_wen_q | sys_ren_q;
             sys_err_o <= 1'b0;
 
             // Write
-            if (sys_wen_i) begin
-                case (sys_addr_i[19:0])
-                    20'h00000: reg_control    <= sys_wdata_i;
-                    20'h00004: reg_kp         <= sys_wdata_i;
-                    20'h00008: reg_ki         <= sys_wdata_i;
-                    20'h0000C: reg_setpoint   <= sys_wdata_i[13:0];
-                    20'h00010: reg_sig_gen_1  <= sys_wdata_i;
-                    20'h00014: reg_sig_gen_2  <= sys_wdata_i;
-                    20'h00018: reg_sig_gen_3  <= sys_wdata_i;
+            if (sys_wen_q) begin
+                case (sys_addr_q[19:0])
+                    20'h00000: reg_control    <= sys_wdata_q;
+                    20'h00004: reg_kp         <= sys_wdata_q;
+                    20'h00008: reg_ki         <= sys_wdata_q;
+                    20'h0000C: reg_setpoint   <= sys_wdata_q[13:0];
+                    20'h00010: reg_sig_gen_1  <= sys_wdata_q;
+                    20'h00014: reg_sig_gen_2  <= sys_wdata_q;
+                    20'h00018: reg_sig_gen_3  <= sys_wdata_q;
                     20'h0001C: ; // Reserved (was noise_cfg)
-                    20'h00020: reg_output_mux_ch1 <= sys_wdata_i[2:0];
-                    20'h00024: reg_output_mux_ch2 <= sys_wdata_i[2:0];
+                    20'h00020: reg_output_mux_ch1 <= sys_wdata_q[2:0];
+                    20'h00024: reg_output_mux_ch2 <= sys_wdata_q[2:0];
                     default: ;
                 endcase
             end
 
             // Read
-            if (sys_ren_i) begin
-                case (sys_addr_i[19:0])
+            if (sys_ren_q) begin
+                case (sys_addr_q[19:0])
                     20'h00000: sys_rdata_o <= reg_control;
                     20'h00004: sys_rdata_o <= reg_kp;
                     20'h00008: sys_rdata_o <= reg_ki;
@@ -188,7 +207,7 @@ module feedback_controller_top (
     ) u_cic (
         .clk(clk_i),
         .rst_n(cic_rst_n),
-        .d_in(adc_dat_a_i),
+        .d_in(adc_dat_a_q),
         .d_out_valid(cic_out_valid),
         .d_out(cic_out_raw)
     );
@@ -214,7 +233,7 @@ module feedback_controller_top (
     wire signed [13:0] pid_din;
     wire               pid_din_valid;
 
-    assign pid_din       = cic_enable ? scaler_out       : adc_dat_a_i;
+    assign pid_din       = cic_enable ? scaler_out       : adc_dat_a_q;
     assign pid_din_valid = cic_enable ? scaler_out_valid  : global_enable;
 
     // =========================================================================
@@ -237,8 +256,8 @@ module feedback_controller_top (
     // 7. Output MUX Logic (Independent CH1 / CH2 selection)
     // =========================================================================
     // Signal options:
-    //   0: ADC Channel A  (adc_dat_a_i - real ADC input)
-    //   1: ADC Channel B  (adc_dat_b_i)
+    //   0: ADC Channel A  (adc_dat_a_q - real ADC input)
+    //   1: ADC Channel B  (adc_dat_b_q)
     //   2: Disturbance    (disturbance_sig - from signal model)
     //   3: Feedback/PID   (feedback_to_dac)
     //   4: DAC output     (dac_out_o - disturbance + feedback, what goes to DAC)
@@ -249,25 +268,25 @@ module feedback_controller_top (
     
     always_comb begin
         case (reg_output_mux_ch1)
-            3'd0: mux_ch1 = adc_dat_a_i;
-            3'd1: mux_ch1 = adc_dat_b_i;
+            3'd0: mux_ch1 = adc_dat_a_q;
+            3'd1: mux_ch1 = adc_dat_b_q;
             3'd2: mux_ch1 = disturbance_sig;
             3'd3: mux_ch1 = feedback_to_dac;
             3'd4: mux_ch1 = dac_out_o;
             3'd5: mux_ch1 = scaler_out;
-            default: mux_ch1 = adc_dat_a_i;
+            default: mux_ch1 = adc_dat_a_q;
         endcase
     end
 
     always_comb begin
         case (reg_output_mux_ch2)
-            3'd0: mux_ch2 = adc_dat_a_i;
-            3'd1: mux_ch2 = adc_dat_b_i;
+            3'd0: mux_ch2 = adc_dat_a_q;
+            3'd1: mux_ch2 = adc_dat_b_q;
             3'd2: mux_ch2 = disturbance_sig;
             3'd3: mux_ch2 = feedback_to_dac;
             3'd4: mux_ch2 = dac_out_o;
             3'd5: mux_ch2 = scaler_out;
-            default: mux_ch2 = adc_dat_b_i;
+            default: mux_ch2 = adc_dat_b_q;
         endcase
     end
     
